@@ -174,7 +174,6 @@ void __slog(slog_t log, void* args) {
 // Log a message with the specified level
 #define SLOG_RAW(level, args, message)                                                                                 \
     do {                                                                                                               \
-        struct timespec ts;                                                                                            \
         slog_t log = {level, (char*)message, time(NULL), (char*)__FILE__, (char*)__PRETTY_FUNCTION__, __LINE__};       \
         __slog(log, args);                                                                                             \
     } while (0)
