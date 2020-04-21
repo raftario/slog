@@ -73,6 +73,7 @@ struct __slog_handler_node {
     slog_handler_t handler;
 
     slog_init_t init;
+    int is_init;
     slog_uninit_t uninit;
 
     struct __slog_handler_node* next;
@@ -92,9 +93,10 @@ void slog_init() {
 
     struct __slog_handler_node* ptr = __slog_handlers;
     while (ptr != NULL) {
-        if (ptr->init != NULL) {
+        if (!ptr->is_init && ptr->init != NULL) {
             ptr->init();
         }
+        ptr->is_init = 1;
         ptr = ptr->next;
     }
 
@@ -113,6 +115,9 @@ void slog_uninit() {
     struct __slog_handler_node* next;
     while (current != NULL) {
         next = current->next;
+        if (!current->is_init && current->uninit != NULL) {
+            current->uninit();
+        }
         free(current);
         current = next;
     }
@@ -127,6 +132,7 @@ void slog_handlers_register(slog_handler_t handler, slog_init_t init, slog_unini
     struct __slog_handler_node* node = (struct __slog_handler_node*)malloc(sizeof(struct __slog_handler_node));
     node->handler = handler;
     node->init = init;
+    node->is_init = 0;
     node->uninit = uninit;
     node->next = __slog_handlers;
 
@@ -146,7 +152,7 @@ void __slog(slog_t log, void* args) {
 
     struct __slog_handler_node* ptr = __slog_handlers;
     while (ptr != NULL) {
-        if (ptr->handler != NULL) {
+        if (ptr->is_init && ptr->handler != NULL) {
             ptr->handler(&log, args);
         }
         ptr = ptr->next;
