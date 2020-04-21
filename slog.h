@@ -146,20 +146,13 @@ void __slog(slog_t log, void* args) {
     pthread_mutex_lock(&__slog_lock);
 #endif
 
-    if (__slog_handlers == NULL) {
-#ifdef SLOG_PTHREAD
-        pthread_mutex_unlock(&__slog_lock);
-#endif
-        return;
-    }
-
     struct __slog_handler_node* ptr = __slog_handlers;
-    do {
+    while (ptr != NULL) {
         if (ptr->handler != NULL) {
             ptr->handler(&log, args);
         }
         ptr = ptr->next;
-    } while (ptr != NULL);
+    }
 
 #ifdef SLOG_PTHREAD
     pthread_mutex_unlock(&__slog_lock);
