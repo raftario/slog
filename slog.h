@@ -115,7 +115,7 @@ void slog_uninit() {
     struct __slog_handler_node* next;
     while (current != NULL) {
         next = current->next;
-        if (!current->is_init && current->uninit != NULL) {
+        if (current->is_init && current->uninit != NULL) {
             current->uninit();
         }
         free(current);
