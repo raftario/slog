@@ -124,18 +124,16 @@ void slog_uninit() {
 
 // Adds a new log handler
 void slog_handlers_register(slog_handler_t handler, slog_init_t init, slog_uninit_t uninit) {
-#ifdef SLOG_PTHREAD
-    pthread_mutex_lock(&__slog_lock);
-#endif
-
     struct __slog_handler_node* node = (struct __slog_handler_node*)malloc(sizeof(struct __slog_handler_node));
     node->handler = handler;
     node->init = init;
     node->uninit = uninit;
-
     node->next = __slog_handlers;
-    __slog_handlers = node;
 
+#ifdef SLOG_PTHREAD
+    pthread_mutex_lock(&__slog_lock);
+#endif
+    __slog_handlers = node;
 #ifdef SLOG_PTHREAD
     pthread_mutex_unlock(&__slog_lock);
 #endif
